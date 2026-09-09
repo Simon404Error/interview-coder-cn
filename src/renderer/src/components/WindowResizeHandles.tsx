@@ -9,10 +9,18 @@ const HORIZONTAL_DIRECTIONS: ResizeDirection[] = ['e', 'w']
 
 export function WindowResizeHandles({
   enabled,
-  axis = 'both'
+  axis = 'both',
+  nonActivating = false
 }: {
   enabled: boolean
   axis?: 'both' | 'x'
+  /**
+   * Set for a window that can never be activated (the overlay toolbar): Windows
+   * discards the press that lands on one, so the drag has to be picked up from
+   * the first move made with the button already down. Left off elsewhere — in a
+   * normal window that move is someone dragging a selection past the edge.
+   */
+  nonActivating?: boolean
 }) {
   const isResizing = useRef(false)
 
@@ -42,7 +50,7 @@ export function WindowResizeHandles({
   if (!enabled) return null
 
   const startResize = (event: ReactPointerEvent<HTMLDivElement>, direction: ResizeDirection) => {
-    if (event.button !== 0) return
+    if (isResizing.current) return
     isResizing.current = true
     // Started before capturing: main is what actually resizes, and capture is
     // best-effort — it fails on macOS panels and throws on a stale pointer id
@@ -63,7 +71,18 @@ export function WindowResizeHandles({
       className={`window-resize-handle window-resize-${direction}${
         horizontalOnly ? ' window-resize-no-corners' : ''
       }`}
-      onPointerDown={(event) => startResize(event, direction)}
+      onPointerDown={(event) => {
+        if (event.button !== 0) return
+        startResize(event, direction)
+      }}
+      onPointerMove={
+        nonActivating
+          ? (event) => {
+              if (event.buttons !== 1) return
+              startResize(event, direction)
+            }
+          : undefined
+      }
     />
   ))
 }

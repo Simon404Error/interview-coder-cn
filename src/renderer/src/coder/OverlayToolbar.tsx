@@ -38,8 +38,9 @@ export function OverlayToolbar() {
         <ToolbarButton key={action} action={action} Icon={Icon} hoverDelay={hoverDelay} />
       ))}
       {/* Always on, width only: the height is the button row. main.css keeps
-          these edges from ever showing a resize cursor */}
-      <WindowResizeHandles enabled axis="x" />
+          these edges from ever showing a resize cursor. `nonActivating` because
+          Windows eats this window's presses, see ToolbarButton below */}
+      <WindowResizeHandles enabled axis="x" nonActivating />
     </div>
   )
 }
@@ -73,8 +74,16 @@ function useVisibleActionCount(barRef: RefObject<HTMLDivElement | null>): number
 }
 
 /**
- * Fires on click, and — when a dwell time is configured — on hovering the button
- * for that long, which triggers the action without ever emitting a mouse click.
+ * Fires on mouse release, and — when a dwell time is configured — on hovering
+ * the button for that long, which triggers the action without ever pressing it.
+ *
+ * The release, not a click: there is no click on Windows. This window is
+ * `focusable: false`, so Chromium answers the WM_MOUSEACTIVATE of the press
+ * with MA_NOACTIVATEANDEAT ("do not activate, and discard the mouse message"),
+ * and Windows drops the button-down before the page ever sees it. The
+ * button-up is delivered as usual, so the DOM gets a mouseup with no mousedown
+ * ahead of it — and therefore never a click. Moves are untouched, which is why
+ * hover dwell has always worked there.
  */
 function ToolbarButton({
   action,
@@ -117,7 +126,8 @@ function ToolbarButton({
       size="icon"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={cancelDwell}
-      onClick={() => {
+      onMouseUp={(event) => {
+        if (event.button !== 0) return
         cancelDwell()
         void window.api.triggerAction(action)
       }}
