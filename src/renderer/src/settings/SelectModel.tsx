@@ -15,8 +15,8 @@ import {
 
 const defaultModels = [
   {
-    value: 'deepseek/deepseek-v4-flash-vision-exp',
-    label: 'deepseek/deepseek-v4-flash-vision-exp'
+    value: 'deepseek/deepseek-flash',
+    label: 'deepseek/deepseek-flash'
   },
   { value: 'Qwen/Qwen3-VL-32B-Instruct', label: 'Qwen/Qwen3-VL-32B-Instruct' },
   { value: 'Qwen/Qwen3-VL-8B-Thinking', label: 'Qwen/Qwen3-VL-8B-Thinking' },
