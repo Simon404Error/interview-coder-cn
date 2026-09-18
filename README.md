@@ -1,6 +1,4 @@
-# 截屏解题助手 / 编码面试助手 / 在线考试助手
-
-![使用演示](https://github.com/user-attachments/assets/19781594-3108-4711-a54b-9d36496787bc)
+# Ai 答题助手
 
 ## 项目简介
 
@@ -22,55 +20,7 @@
 - **在线考试**：单选、多选、解答等通用题型，切换到「通用问答」场景即可
 - **其他场景**：添加自定义提示词场景，自行扩展
 
-
-## 如何使用
-
-> 注意：项目有编译安装包，你也可以直接下载安装包使用（如何安装，以及安装完后如何配置，请参考 [Wiki 教程](https://github.com/ooboqoo/interview-coder-cn/wiki/%E7%9B%B4%E6%8E%A5%E4%B8%8B%E8%BD%BD%E5%AE%89%E8%A3%85%E5%8C%85%E4%BD%BF%E7%94%A8)）。
-
-> 注意：详细的使用教程请移步本项目的 [Wiki](https://github.com/ooboqoo/interview-coder-cn/wiki) 页面查看。
-
-### 1. 安装依赖
-
-注：项目运行依赖 Node.js 环境，如未安装请先安装 [下载地址](https://nodejs.org/zh-cn/download)。
-
-```bash
-$ npm install
-```
-
-### 2. 启动程序开始正常使用
-
-```bash
-$ npm run dev
-```
-
-### 3. 配置 API Key
-
-> 注意，应大家的要求，从 1.6 版本开始，添加了对「硅基流动」API 的支持，方便大家使用国内模型。
-
-启动程序后，进入「设置」页面，配置 `API Base URL` 和 `API Key`。
-
-API 地址和 API Key 需要从支持 OpenAI API 的代理服务商处获取。如国内的 [硅基流动](https://cloud.siliconflow.cn/i/SG8C0772) 或国外的 [OpenRouter](https://openrouter.ai/) 等服务商，支持支付宝付款。
-
-当然，如果你（人在海外）可以直接使用 OpenAI 官方的 API 更好，只需要配置 `API Key` 就够了。
-
-> 也可以在项目根目录创建 `.env` 文件预配置，程序启动后会自动读取作为默认值。
-
-```env
-API_BASE_URL="https://openrouter.ai/api/v1" # 聚合服务的 API 地址，这里以 OpenRouter 为例
-API_KEY="sk-1234567890" # 代理服务商的 API Key，这里只是示例，需要改成你自己的
-```
-
-### 4. （可选）配置语音转录
-
-语音转录功能可以实时将电脑播放的声音（如面试官讲话、听力音频）转为文字，并在截图时一起提交给 AI 辅助分析题意。
-
-目前该功能固定使用 Fun-ASR 模型 (0.02元/分钟，新用户有10小时免费额度)，需要配置阿里云百炼平台的 API Key：
-
-1. 访问 [百炼平台控制台](https://help.aliyun.com/zh/model-studio/get-api-key) 注册并创建 API Key
-2. 在应用「设置」页面的「语音转录」部分填入 API Key
-3. 使用快捷键（默认 `Alt+T` / `Ctrl+T`）开始/暂停语音转录
-
-## 背景主题（深色 / 浅色）
+## 新功能：背景色
 
 默认是深色半透明窗口。如果做题页面是白色背景，深色窗口会格外显眼，这时可以在「设置 → 界面设置 → 背景主题」里切换为**浅色（白底黑字）**：顶栏、内容区、悬浮工具条、状态栏、语音条，以及 Markdown 正文和代码高亮都会一并变成浅色。
 
@@ -80,12 +30,6 @@ API_KEY="sk-1234567890" # 代理服务商的 API Key，这里只是示例，需�
 ## 关于隐身能力的说明
 
 目前隐身功能适配市面上大部分会议软件(如 腾讯会议 等)，但很少部分软件和浏览器可能无法正常隐身。使用前自己做好测试，本项目不承担任何责任。相关问题欢迎大家提 Issue 讨论。
-
-
-## 视频教程
-
-具体可到 [Wiki](https://github.com/ooboqoo/interview-coder-cn/wiki) 页面查看。
-
 
 ## 许可协议（License）
 
