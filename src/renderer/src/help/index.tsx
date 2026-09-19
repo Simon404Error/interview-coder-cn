@@ -43,7 +43,7 @@ export default function HelpPage() {
         {/* Introduction */}
         <HelpSection Icon={Info} title="简介" description={appVersion && `当前版本 v${appVersion}`}>
           <p className="text-gray-700">
-            欢迎使用截屏解题助手！无论是 编程面试 / 在线考试 还是其他解题场景，
+            欢迎使用截屏答题助手！无论是 编程面试 / 在线考试 还是其他解题场景，
             该工具都可以帮助您快速截图，分析屏幕内容，并给出解答建议。 您可以访问本项目{' '}
             <a
               href="https://github.com/ooboqoo/interview-coder-cn/wiki"

@@ -16,7 +16,7 @@ export function AppHeader() {
   return (
     <div id="app-header" className="flex items-center">
       <div className="mx-auto flex items-baseline gap-1.5">
-        <span>截屏解题助手</span>
+        <span>截屏答题助手</span>
         {appVersion && <span className="text-[10px] opacity-60">v{appVersion}</span>}
       </div>
       <div className={`actions ${ignoreMouse ? 'pointer-events-none' : ''}`}>

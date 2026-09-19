@@ -71,6 +71,8 @@ interface Settings {
   /** Window colour scheme; `light` is a white background with dark text */
   theme: Theme
   apiBaseURL: string
+  /** API Base URL entries the user created from the picker, kept as a shortcut list */
+  customBaseURLs: string[]
   apiKey: string
   model: string
   customModels: string[]
@@ -114,6 +116,7 @@ interface SettingsStore extends Settings {
 const defaultSettings: Settings = {
   theme: DEFAULT_THEME,
   apiBaseURL: '',
+  customBaseURLs: [],
   apiKey: '',
   model: '',
   customModels: [],

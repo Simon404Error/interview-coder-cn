@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router'
 import { Eye, EyeOff } from 'lucide-react'
 import { useSettingsStore } from '@/lib/store/settings'
 import { Button } from '@/components/ui/button'
+import { SelectBaseURL } from '@/settings/SelectBaseURL'
 
 export function PrerequisitesChecker() {
   const navigate = useNavigate()
@@ -28,7 +29,7 @@ export function PrerequisitesChecker() {
   return (
     <div className="fixed top-9 left-0 right-0 bottom-0 flex bg-black/50">
       <div className="m-auto bg-white rounded-lg p-6 pt-1 w-120 shadow-lg">
-        <h1 className="text-xl font-bold text-center mb-2">欢迎使用截屏解题助手</h1>
+        <h1 className="text-xl font-bold text-center mb-2">欢迎使用截屏答题助手</h1>
         <div className="text-sm text-gray-600">
           请先配置大模型聚合平台信息，如国内的
           <a
@@ -59,12 +60,10 @@ export function PrerequisitesChecker() {
                 (配置硅基流动或其他代理服务商的 API Base URL 地址)
               </span>
             </label>
-            <input
-              type="text"
+            <SelectBaseURL
+              className="w-full"
               value={inputApiBaseURL}
-              onChange={(e) => setInputApiBaseURL(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              placeholder="https://api.openai.com/v1"
+              onChange={setInputApiBaseURL}
             />
           </div>
 

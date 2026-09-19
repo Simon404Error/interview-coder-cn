@@ -40,6 +40,7 @@ import {
 import type { Theme } from '@/lib/theme'
 import { isMac } from '@/lib/utils/env'
 import { SelectModel } from './SelectModel'
+import { SelectBaseURL } from './SelectBaseURL'
 import { CustomShortcuts, ResetDefaultShortcuts } from './CustomShortcuts'
 import {
   Select,
@@ -152,12 +153,9 @@ export default function SettingsPage() {
                   如硅基流动为 https://api.siliconflow.cn/v1
                 </span>
               </label>
-              <input
-                type="text"
+              <SelectBaseURL
                 value={apiBaseURL}
-                onChange={(e) => updateSetting('apiBaseURL', e.target.value)}
-                className="w-60 px-3 py-2 border border-gray-300 rounded-md bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="可为空，默认使用 OpenAI 的 API"
+                onChange={(val) => updateSetting('apiBaseURL', val)}
               />
             </div>
 
@@ -441,30 +439,20 @@ export default function SettingsPage() {
 
           <div className="space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">
-                背景主题
-                <span className="ml-2 text-xs font-light">
-                  做题页面为白色背景时选「浅色」，工具会变为白底黑字，不再显眼
-                </span>
-              </label>
+              <label className="text-sm font-medium">背景主题</label>
               <Select value={theme} onValueChange={(val) => updateSetting('theme', val as Theme)}>
                 <SelectTrigger className="w-60 bg-white">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="dark">深色（默认）</SelectItem>
-                  <SelectItem value="light">浅色（白底黑字）</SelectItem>
+                  <SelectItem value="dark">深色</SelectItem>
+                  <SelectItem value="light">浅色</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">
-                窗口透明度
-                <span className="ml-2 text-xs font-light">
-                  拖动可实时预览效果，也可在主界面用快捷键调节
-                </span>
-              </label>
+              <label className="text-sm font-medium">窗口透明度</label>
               <div className="w-60 flex items-center gap-2">
                 <span className="text-xs whitespace-nowrap">透明</span>
                 <Slider
@@ -482,12 +470,7 @@ export default function SettingsPage() {
             </div>
 
             <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">
-                允许调整主窗口大小
-                <span className="ml-2 text-xs font-light">
-                  关闭后鼠标移到窗口边缘不再出现缩放光标
-                </span>
-              </label>
+              <label className="text-sm font-medium">允许调整主窗口大小</label>
               <Switch
                 className="scale-y-90"
                 checked={resizable}
