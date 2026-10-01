@@ -141,9 +141,9 @@ function HintCardView({ card, ref }: { card: HintCard; ref: (el: HTMLElement | n
             <Brain className="size-3" />
             思考过程
           </summary>
-          <p className="mt-1 max-h-32 overflow-y-auto whitespace-pre-wrap break-words opacity-80">
-            {card.reasoning}
-          </p>
+          <div className="mt-1 max-h-32 overflow-y-auto break-words opacity-80">
+            <MarkdownRenderer compact>{card.reasoning}</MarkdownRenderer>
+          </div>
         </details>
       )}
       {card.text && card.status !== 'waiting' && <MarkdownRenderer>{card.text}</MarkdownRenderer>}

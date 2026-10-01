@@ -1,7 +1,7 @@
 import { streamText, type ModelMessage, type TextStreamPart, type ToolSet } from 'ai'
 import { createOpenAICompatible } from '@ai-sdk/openai-compatible'
 import { settings, getModeProfile } from './settings'
-import type { ApiProfile, AppMode } from '../shared/api-profile'
+import { DEFAULT_API_BASE_URL, type ApiProfile, type AppMode } from '../shared/api-profile'
 import { buildRequestHeaders } from '../shared/request-headers'
 import { createThinkingOffFetch } from './thinking'
 import { getKnowledgePrompt } from './knowledge'
@@ -25,10 +25,11 @@ function reportThinkingRefused(model: string) {
 function createProvider(profile: ApiProfile) {
   // The app only ever talks OpenAI-compatible chat-completions; this provider
   // also surfaces thinking models' reasoning (`reasoning_content` / `reasoning`
-  // deltas) as reasoning stream parts, which @ai-sdk/openai drops
+  // deltas) as reasoning stream parts, which @ai-sdk/openai drops. It has no
+  // default base URL, so an empty one means OpenAI here as everywhere else
   return createOpenAICompatible({
     name: 'interview-coder-cn',
-    baseURL: profile.apiBaseURL,
+    baseURL: profile.apiBaseURL.trim() || DEFAULT_API_BASE_URL,
     apiKey: profile.apiKey,
     headers: buildRequestHeaders(profile.apiKey, profile.apiHeaders),
     // Only when asked for: a plain request is the one every platform accepts

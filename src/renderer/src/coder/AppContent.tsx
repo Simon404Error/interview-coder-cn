@@ -346,12 +346,15 @@ function ReasoningBlock({
       {open && (
         <div
           className={cn(
-            'px-3 pb-2 text-xs whitespace-pre-wrap break-words opacity-80',
-            // Fixed height while reasoning streams; a bounded scroll once done
-            streaming ? 'flex h-12 flex-col justify-end overflow-hidden' : 'max-h-64 overflow-y-auto'
+            'px-3 pb-2 text-xs break-words opacity-80',
+            // Fixed height while reasoning streams: three lines plus the bottom
+            // padding, so no line is cut in half. A bounded scroll once done
+            streaming
+              ? 'flex h-[calc(3lh+0.5rem)] flex-col justify-end overflow-hidden'
+              : 'max-h-64 overflow-y-auto'
           )}
         >
-          {reasoningText}
+          <MarkdownRenderer compact>{reasoningText}</MarkdownRenderer>
         </div>
       )}
     </div>
