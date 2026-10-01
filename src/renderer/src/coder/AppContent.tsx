@@ -2,7 +2,7 @@ import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import { Brain, ChevronDown, Images } from 'lucide-react'
 import { useSettingsStore, type ScreenshotDisplay } from '@/lib/store/settings'
 import { useShortcutsStore } from '@/lib/store/shortcuts'
-import { useSolutionStore } from '@/lib/store/solution'
+import { useSolutionStore, type ReasoningRound, type RoundUi } from '@/lib/store/solution'
 import { cn } from '@/lib/utils'
 import MarkdownRenderer from '@/components/MarkdownRenderer'
 import ShortcutRenderer from '@/components/ShortcutRenderer'
@@ -14,12 +14,16 @@ export function AppContent() {
     screenshotData,
     solutionChunks,
     reasoningRounds,
+    liveRound,
+    roundUi,
     errorMessage,
     setScreenshotData,
     setIsLoading,
     addSolutionChunk,
     addReasoningChunk,
     startReasoningRound,
+    setLiveRound,
+    setRoundOpen,
     setErrorMessage,
     clearSolution
   } = useSolutionStore()
@@ -35,12 +39,6 @@ export function AppContent() {
   const pendingChunks = useRef<string[]>([])
   const pendingReasoning = useRef<string[]>([])
   const frameHandle = useRef<number | null>(null)
-  /** Index of the reasoning round chunks are currently landing in, if any */
-  const liveRound = useRef<number | null>(null)
-  /** How long the answer text was when each reasoning round began */
-  const roundTextStart = useRef<number[]>([])
-  /** Per-round collapse state the user chose; rounds not here follow the stream */
-  const [roundUi, setRoundUi] = useState<Record<number, { open: boolean; pinned: boolean }>>({})
 
   const flushChunks = useCallback(() => {
     if (frameHandle.current !== null) {
@@ -91,9 +89,6 @@ export function AppContent() {
       setScreenshotTotal(0)
       setScreenshotData(null)
       setErrorMessage(null)
-      liveRound.current = null
-      roundTextStart.current = []
-      setRoundUi({})
     })
 
     // Listen for solution chunks, buffered until the next frame (see pendingChunks)
@@ -104,31 +99,22 @@ export function AppContent() {
       }
     })
 
-    // What a thinking model reasoned before answering, buffered the same way
+    // What a thinking model reasoned before answering, buffered the same way;
+    // it lands in the last round, which `addReasoningChunk` marks as live
     window.api.onReasoningChunk((chunk: string) => {
-      const store = useSolutionStore.getState()
-      // The first chunk of a fresh conversation creates round 0 implicitly
-      if (store.reasoningRounds.length === 0 && roundTextStart.current.length === 0) {
-        roundTextStart.current.push(store.solutionChunks.join('').length)
-      }
-      liveRound.current = Math.max(store.reasoningRounds.length - 1, 0)
       pendingReasoning.current.push(chunk)
       if (frameHandle.current === null) {
         frameHandle.current = window.requestAnimationFrame(flushChunks)
       }
     })
 
-    // An appended screenshot or follow-up brings its own reasoning: land any
-    // buffered chunks in the previous round first, then open a new one
+    // An appended screenshot or follow-up gets its own round: land any
+    // buffered chunks in the previous round first, then open one whose answer
+    // text starts at the current end of the text (just after the `---`)
     window.api.onReasoningRoundStart(() => {
       flushChunks()
-      const before = useSolutionStore.getState().reasoningRounds.length
-      startReasoningRound()
       const store = useSolutionStore.getState()
-      if (store.reasoningRounds.length > before) {
-        roundTextStart.current.push(store.solutionChunks.join('').length)
-      }
-      liveRound.current = null
+      startReasoningRound(store.solutionChunks.join('').length)
     })
 
     // AI loading
@@ -169,17 +155,17 @@ export function AppContent() {
     window.api.onSolutionComplete(() => {
       flushChunks()
       setIsLoading(false)
-      liveRound.current = null
+      setLiveRound(null)
     })
     window.api.onSolutionStopped(() => {
       flushChunks()
       setIsLoading(false)
-      liveRound.current = null
+      setLiveRound(null)
     })
     window.api.onSolutionError((message: string) => {
       flushChunks()
       setIsLoading(false)
-      liveRound.current = null
+      setLiveRound(null)
       setErrorMessage(message)
     })
     return () => {
@@ -187,7 +173,7 @@ export function AppContent() {
       window.api.removeSolutionStoppedListener()
       window.api.removeSolutionErrorListener()
     }
-  }, [flushChunks, setIsLoading, setErrorMessage])
+  }, [flushChunks, setIsLoading, setLiveRound, setErrorMessage])
 
   useEffect(() => {
     window.api.onScrollPageUp(() => {
@@ -226,14 +212,14 @@ export function AppContent() {
   // the rest of the solution store (loading flag, timing, errors)
   const solutionText = useMemo(() => solutionChunks.join(''), [solutionChunks])
 
-  // One answer segment per reasoning round. The snapshot is taken right after
-  // main sent that round's `---` separator, so the separator stays at the end
-  // of the previous segment and each segment is markdown split at a paragraph
-  // boundary
+  // One answer segment per round, cut at the snapshots taken when each round
+  // began — right after main sent that round's `---` separator, so the
+  // separator stays at the end of the previous segment and the cut is at a
+  // paragraph boundary
   const answerSegments = useMemo(
     () =>
-      reasoningRounds.map((_, index) =>
-        solutionText.slice(roundTextStart.current[index] ?? 0, roundTextStart.current[index + 1])
+      reasoningRounds.map((round, index) =>
+        solutionText.slice(round.textStart, reasoningRounds[index + 1]?.textStart)
       ),
     [solutionText, reasoningRounds]
   )
@@ -289,9 +275,10 @@ export function AppContent() {
       )}
 
       {/* Answers interleave with their reasoning: 思考1 正文1 --- 思考2 正文2.
-          Each round's reasoning sits above that round's answer text, and the
-          `---` separator main sent with the next round lands at the end of the
-          previous segment. With no reasoning at all this is one plain answer. */}
+          Each round's block sits above that round's answer segment; a round
+          without reasoning shows no block but still owns its segment. The
+          branch below only covers text that arrived with no rounds at all
+          (a conversation always has round 0 from the moment it is cleared). */}
       {reasoningRounds.length === 0 ? (
         <MarkdownRenderer>{solutionText}</MarkdownRenderer>
       ) : (
@@ -300,18 +287,10 @@ export function AppContent() {
             <ReasoningBlock
               round={round}
               label={index === 0 ? '思考过程' : `思考过程 · ${index + 1}`}
-              live={liveRound.current === index && round.length > 0}
-              answerStarted={solutionText.length > (roundTextStart.current[index] ?? 0)}
+              live={liveRound === index}
+              answerStarted={solutionText.length > round.textStart}
               ui={roundUi[index]}
-              onToggle={() => {
-                setRoundUi((prev) => {
-                  const current = prev[index] ?? { open: true, pinned: false }
-                  return {
-                    ...prev,
-                    [index]: { open: !current.open, pinned: true }
-                  }
-                })
-              }}
+              onToggle={(open) => setRoundOpen(index, !open)}
             />
             <MarkdownRenderer>{answerSegments[index] ?? ''}</MarkdownRenderer>
           </Fragment>
@@ -336,16 +315,18 @@ function ReasoningBlock({
   ui,
   onToggle
 }: {
-  round: string[]
+  round: ReasoningRound
   label: string
   /** Chunks are still arriving for this round */
   live: boolean
   /** This round's answer text has started below it */
   answerStarted: boolean
-  ui: { open: boolean; pinned: boolean } | undefined
-  onToggle: () => void
+  /** What the user chose for this round; absent until they click its header */
+  ui: RoundUi | undefined
+  /** Called with the state the block is currently in, so a click always flips it */
+  onToggle: (open: boolean) => void
 }) {
-  const reasoningText = useMemo(() => round.join(''), [round])
+  const reasoningText = useMemo(() => round.chunks.join(''), [round.chunks])
   if (!reasoningText) return null
 
   const open = ui?.pinned ? ui.open : live && !answerStarted
@@ -355,7 +336,7 @@ function ReasoningBlock({
     <div className="mb-4 rounded-lg border border-app-border">
       <button
         type="button"
-        onClick={onToggle}
+        onClick={() => onToggle(open)}
         className="flex w-full cursor-pointer items-center gap-1.5 px-3 py-1.5 text-xs text-app-muted-fg select-none"
       >
         <Brain className="size-3.5" />
