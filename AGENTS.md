@@ -203,6 +203,7 @@ src/
 - `sync-app-state` — push state changes (e.g., mouse ignore toggle) to both the main and the toolbar window
 - `screenshot-taken` / `screenshots-updated` — screenshot data (`screenshots-updated` also carries the untruncated conversation total)
 - `solution-clear` / `solution-chunk` / `solution-complete` / `solution-stopped` / `solution-error` — AI streaming lifecycle
+- `reasoning-chunk` / `reasoning-round-start` — a thinking model's reasoning, streamed above the answer; a later request (appended screenshot, follow-up) starts a new round with its own block
 - `ai-loading-start` / `ai-loading-end` — loading state
 - `solution-duration` — how long the finished request took (ms), timed in main from the key press
 - `switch-api-profile` — step the current mode's AI profile (`1` / `-1`); the list lives in the renderer store

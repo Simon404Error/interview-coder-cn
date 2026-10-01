@@ -1,11 +1,11 @@
 /**
  * Asking the model to skip its thinking phase.
  *
- * The app never shows a model's reasoning, so while a thinking model reasons
- * the user stares at a spinner. Measured with a screenshot of an easy problem,
- * switching it off took DeepSeek V4.1 Flash and GLM-4.5V from 4–28s to 1–2s
- * before the first visible character; models that do not think by default are
- * unaffected.
+ * The app now streams a model's reasoning while it forms (see ai.ts), but a
+ * user who prefers the answer sooner can still switch thinking off. Measured
+ * with a screenshot of an easy problem, switching it off took DeepSeek V4.1
+ * Flash and GLM-4.5V from 4–28s to 1–2s before the first visible character;
+ * models that do not think by default are unaffected.
  *
  * The OpenAI chat body has no standard field for this and every platform
  * spells it differently, so the fields are merged into the outgoing request
